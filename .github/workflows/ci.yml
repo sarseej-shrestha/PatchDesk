@@ -1,0 +1,91 @@
+name: PatchDesk CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    name: Backend build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore backend/PatchDesk.sln --locked-mode
+      - run: dotnet build backend/PatchDesk.sln --configuration Release --no-restore
+      - run: dotnet test backend/PatchDesk.sln --configuration Release --no-build --no-restore --logger trx --collect:"XPlat Code Coverage" --results-directory "${{ runner.temp }}/backend-results"
+      - run: dotnet tool restore
+      - name: Check migration model and apply schema
+        run: |
+          dotnet ef migrations has-pending-model-changes --project backend/PatchDesk.Api --configuration Release --no-build
+          dotnet run --project backend/PatchDesk.Api --configuration Release --no-build --no-launch-profile -- --reset --seed
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: backend-results
+          path: ${{ runner.temp }}/backend-results
+          if-no-files-found: warn
+  frontend:
+    name: Frontend lint types and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint -- --max-warnings 0
+      - run: npm run typecheck
+      - run: npm run build
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+  browser:
+    name: Chromium full stack smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: dotnet restore backend/PatchDesk.sln --locked-mode
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: scripts/browser-check.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: browser-results
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+            .tools/overview.png
+            .tools/mobile.png
+          include-hidden-files: true
+          if-no-files-found: warn
