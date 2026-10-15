@@ -1,8 +1,22 @@
+using Microsoft.EntityFrameworkCore;
+using PatchDesk.Api.Data;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+builder.Services.AddDbContext<PatchDeskDbContext>(o => o.UseSqlite(builder.Configuration.GetConnectionString("PatchDesk") ?? "Data Source=patchdesk.db"));
 var app = builder.Build();
+if (args.Contains("--migrate") || args.Contains("--seed") || args.Contains("--reset"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<PatchDeskDbContext>();
+    if (args.Contains("--reset")) await db.Database.EnsureDeletedAsync();
+    await db.Database.MigrateAsync();
+    if (args.Contains("--seed")) await DemoSeed.LoadAsync(db);
+    return;
+}
 app.UseExceptionHandler();
 app.MapOpenApi();
 app.MapGet("/api/health", () => Results.Ok(new { status = "healthy" }));
