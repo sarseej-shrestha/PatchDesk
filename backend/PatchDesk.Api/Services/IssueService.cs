@@ -14,7 +14,7 @@ public class IssueService(PatchDeskDbContext db)
     public async Task<Issue> Get(int id, CancellationToken ct = default) => await Details.SingleOrDefaultAsync(i => i.Id == id, ct) ?? throw new ApiException(404, "Issue not found.");
     public async Task RequireActor(int id, CancellationToken ct = default)
     {
-        if (!await db.Developers.AnyAsync(d => d.Id == id, ct)) throw new ApiException(400, "Select an existing demo actor.");
+        if (await db.Developers.FindAsync([id], ct) == null) throw new ApiException(400, "Select an existing demo actor.");
     }
     public static void RequireVersion(Issue issue, int version)
     {
