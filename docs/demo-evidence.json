@@ -1,0 +1,214 @@
+{
+  "registry": {
+    "tests": [
+      {
+        "identifier": "discount.boundary",
+        "name": "Discount at the $100 boundary",
+        "description": "A 10% discount on $100 must produce $90.",
+        "subtotal": 100,
+        "percent": 10,
+        "expected": 90
+      },
+      {
+        "identifier": "discount.full",
+        "name": "Full discount at the boundary",
+        "description": "A 100% discount on $100 must produce $0.",
+        "subtotal": 100,
+        "percent": 100,
+        "expected": 0
+      },
+      {
+        "identifier": "discount.rounding",
+        "name": "Round invoice totals to cents",
+        "description": "A 10% discount on $100.05 rounds to $90.05, away from zero.",
+        "subtotal": 100.05,
+        "percent": 10,
+        "expected": 90.05
+      }
+    ],
+    "buildCommit": "33e1ea58395fe4448c065b3bbabc3d490a95eda5",
+    "isClean": true,
+    "assemblySha256": "030fe76b680e2e6b72e2cb686a7e2ba6d266f538798ab652492cae1a88602c94",
+    "executionSource": "PatchDesk controlled registry"
+  },
+  "before": {
+    "id": 1,
+    "result": "Failed",
+    "executionSource": "PatchDesk controlled registry",
+    "commitHash": "33e1ea58395fe4448c065b3bbabc3d490a95eda5",
+    "executedAt": "2026-10-15T17:35:38.353175",
+    "durationMilliseconds": 0,
+    "evidence": "discount.boundary: subtotal=100; discount=10%; expected=90; actual=100; fixture=defective; assembly-sha256=030fe76b680e2e6b72e2cb686a7e2ba6d266f538798ab652492cae1a88602c94; clean-checkout=True",
+    "evidenceRevision": 2,
+    "isDefectiveFixture": true
+  },
+  "issue": {
+    "id": 104,
+    "title": "Discount calculation fails at boundary values",
+    "description": "At the $100 threshold, a 10% invoice discount is skipped. Expected $90; the isolated defective fixture returns $100.",
+    "reproductionSteps": "1. Use subtotal 100.00.\n2. Apply discount 10%.\n3. Expected: 90.00. Defective fixture: 100.00.",
+    "issueType": "Bug",
+    "priority": "Low",
+    "severity": "Minor",
+    "status": "Resolved",
+    "reporterId": 2,
+    "reporter": "Theo Brooks",
+    "assigneeId": 5,
+    "assignee": "Lena Park",
+    "createdAt": "2026-10-01T13:00:00",
+    "updatedAt": "2026-10-15T17:35:38.387042",
+    "resolvedAt": "2026-10-15T17:35:38.387015",
+    "resolutionNote": "The controlled boundary and full-discount assertions passed for the linked clean build. The defective boundary fixture failed as expected.",
+    "resolutionOverridden": false,
+    "version": 7,
+    "evidenceRevision": 2,
+    "comments": [
+      {
+        "id": 3,
+        "authorId": 5,
+        "author": "Lena Park",
+        "content": "Please document the reproduction and link execution evidence before review. (Fictional demo comment.)",
+        "createdAt": "2026-10-01T14:00:00"
+      }
+    ],
+    "activities": [
+      {
+        "id": 31,
+        "issueId": 104,
+        "actorId": 5,
+        "actor": "Lena Park",
+        "action": "StatusChanged",
+        "previousValue": "InReview",
+        "newValue": "Resolved: The controlled boundary and full-discount assertions passed for the linked clean build. The defective boundary fixture failed as expected.",
+        "timestamp": "2026-10-15T17:35:38.387042"
+      },
+      {
+        "id": 30,
+        "issueId": 104,
+        "actorId": 1,
+        "actor": "Maya Chen",
+        "action": "StatusChanged",
+        "previousValue": "InProgress",
+        "newValue": "InReview",
+        "timestamp": "2026-10-15T17:35:38.382036"
+      },
+      {
+        "id": 29,
+        "issueId": 104,
+        "actorId": 1,
+        "actor": "Maya Chen",
+        "action": "TestExecuted",
+        "previousValue": null,
+        "newValue": "discount.full: Passed (corrected implementation)",
+        "timestamp": "2026-10-15T17:35:38.370072"
+      },
+      {
+        "id": 28,
+        "issueId": 104,
+        "actorId": 1,
+        "actor": "Maya Chen",
+        "action": "TestExecuted",
+        "previousValue": null,
+        "newValue": "discount.boundary: Passed (corrected implementation)",
+        "timestamp": "2026-10-15T17:35:38.365654"
+      },
+      {
+        "id": 27,
+        "issueId": 104,
+        "actorId": 1,
+        "actor": "Maya Chen",
+        "action": "TestExecuted",
+        "previousValue": null,
+        "newValue": "discount.boundary: Failed (defective fixture)",
+        "timestamp": "2026-10-15T17:35:38.353613"
+      },
+      {
+        "id": 26,
+        "issueId": 104,
+        "actorId": 1,
+        "actor": "Maya Chen",
+        "action": "FixLinked",
+        "previousValue": null,
+        "newValue": "33e1ea58395fe4448c065b3bbabc3d490a95eda5",
+        "timestamp": "2026-10-15T17:35:38.290497"
+      },
+      {
+        "id": 5,
+        "issueId": 104,
+        "actorId": 2,
+        "actor": "Theo Brooks",
+        "action": "SeededDemo",
+        "previousValue": null,
+        "newValue": "Fictional issue initialized as InProgress",
+        "timestamp": "2026-10-01T13:00:00"
+      }
+    ],
+    "regressionTests": [
+      {
+        "id": 1,
+        "testName": "Discount at the $100 boundary",
+        "description": "A 10% discount on $100 must produce $90.",
+        "testIdentifier": "discount.boundary",
+        "framework": "PatchDesk controlled registry (shared xUnit assertions)",
+        "latestResult": "Passed",
+        "lastExecutedAt": "2026-10-15T17:35:38.36565",
+        "executions": [
+          {
+            "id": 2,
+            "result": "Passed",
+            "executionSource": "PatchDesk controlled registry",
+            "commitHash": "33e1ea58395fe4448c065b3bbabc3d490a95eda5",
+            "executedAt": "2026-10-15T17:35:38.36565",
+            "durationMilliseconds": 0,
+            "evidence": "discount.boundary: subtotal=100; discount=10%; expected=90; actual=90.0; fixture=corrected; assembly-sha256=030fe76b680e2e6b72e2cb686a7e2ba6d266f538798ab652492cae1a88602c94; clean-checkout=True",
+            "evidenceRevision": 2,
+            "isDefectiveFixture": false
+          },
+          {
+            "id": 1,
+            "result": "Failed",
+            "executionSource": "PatchDesk controlled registry",
+            "commitHash": "33e1ea58395fe4448c065b3bbabc3d490a95eda5",
+            "executedAt": "2026-10-15T17:35:38.353175",
+            "durationMilliseconds": 0,
+            "evidence": "discount.boundary: subtotal=100; discount=10%; expected=90; actual=100; fixture=defective; assembly-sha256=030fe76b680e2e6b72e2cb686a7e2ba6d266f538798ab652492cae1a88602c94; clean-checkout=True",
+            "evidenceRevision": 2,
+            "isDefectiveFixture": true
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "testName": "Full discount at the boundary",
+        "description": "A 100% discount on $100 must produce $0.",
+        "testIdentifier": "discount.full",
+        "framework": "PatchDesk controlled registry (shared xUnit assertions)",
+        "latestResult": "Passed",
+        "lastExecutedAt": "2026-10-15T17:35:38.370067",
+        "executions": [
+          {
+            "id": 3,
+            "result": "Passed",
+            "executionSource": "PatchDesk controlled registry",
+            "commitHash": "33e1ea58395fe4448c065b3bbabc3d490a95eda5",
+            "executedAt": "2026-10-15T17:35:38.370067",
+            "durationMilliseconds": 0,
+            "evidence": "discount.full: subtotal=100; discount=100%; expected=0; actual=0; fixture=corrected; assembly-sha256=030fe76b680e2e6b72e2cb686a7e2ba6d266f538798ab652492cae1a88602c94; clean-checkout=True",
+            "evidenceRevision": 2,
+            "isDefectiveFixture": false
+          }
+        ]
+      }
+    ],
+    "fixReferences": [
+      {
+        "id": 1,
+        "branchName": "main",
+        "commitHash": "33e1ea58395fe4448c065b3bbabc3d490a95eda5",
+        "pullRequestUrl": null,
+        "description": "Running clean build containing the corrected discount calculator and shared regression assertions.",
+        "createdAt": "2026-10-15T17:35:38.290392"
+      }
+    ]
+  }
+}
