@@ -39,3 +39,7 @@ public static class DtoMapper
         i.RegressionTests.Select(t => new RegressionDto(t.Id, t.TestName, t.Description, t.TestIdentifier, t.Framework, t.LatestResult, t.LastExecutedAt, t.Executions.OrderByDescending(e => e.Id).Select(e => new ExecutionDto(e.Id, e.Result, e.ExecutionSource, e.CommitHash, e.ExecutedAt, e.DurationMilliseconds, e.Evidence, e.EvidenceRevision, e.IsDefectiveFixture)).ToArray())).ToArray(),
         i.FixReferences.OrderByDescending(f => f.Id).Select(f => new FixDto(f.Id, f.BranchName, f.CommitHash, f.PullRequestUrl, f.Description, f.CreatedAt)).ToArray());
 }
+public record TransitionRequest(
+    [EnumDataType(typeof(IssueStatus))] IssueStatus Status,
+    [Range(1, int.MaxValue)] int ActorId, [Range(1, int.MaxValue)] int Version,
+    [StringLength(5000)] string? ResolutionNote = null, bool ManualOverride = false, [StringLength(5000)] string? OverrideReason = null);

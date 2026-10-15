@@ -8,6 +8,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<PatchDesk.Api.Middleware.ApiExceptionHandler>();
 builder.Services.AddScoped<PatchDesk.Api.Services.IssueService>();
+builder.Services.AddScoped<PatchDesk.Api.Services.WorkflowService>();
 builder.Services.AddDbContext<PatchDeskDbContext>(o => o.UseSqlite(builder.Configuration.GetConnectionString("PatchDesk") ?? "Data Source=patchdesk.db"));
 var app = builder.Build();
 if (args.Contains("--migrate") || args.Contains("--seed") || args.Contains("--reset"))
