@@ -25,3 +25,17 @@ public class PersistenceTests
         await Assert.ThrowsAsync<DbUpdateException>(() => f.Db.SaveChangesAsync());
     }
 }
+
+public class ConcurrencyPersistenceTests
+{
+    [Fact]
+    public async Task DatabaseTokenRejectsAStaleContext()
+    {
+        await using var f = new DatabaseFixture(); await DemoSeed.LoadAsync(f.Db);
+        await using var other = new PatchDeskDbContext(new DbContextOptionsBuilder<PatchDeskDbContext>().UseSqlite(f.Db.Database.GetDbConnection()).Options);
+        var stale = await other.Issues.SingleAsync(i => i.Id == 104);
+        var winner = await f.Db.Issues.SingleAsync(i => i.Id == 104); winner.Title = "Winning title"; winner.Version++;
+        await f.Db.SaveChangesAsync(); stale.Title = "Stale overwrite"; stale.Version++;
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => other.SaveChangesAsync());
+    }
+}
