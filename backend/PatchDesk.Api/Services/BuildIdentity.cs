@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 namespace PatchDesk.Api.Services;
+
 public interface IBuildIdentity
 {
     string Commit { get; }

@@ -4,7 +4,8 @@ namespace PatchDesk.Api.Services;
 
 public static class WorkflowEngine
 {
-    private static readonly IReadOnlyDictionary<IssueStatus, IssueStatus[]> Transitions = new Dictionary<IssueStatus, IssueStatus[]> {
+    private static readonly IReadOnlyDictionary<IssueStatus, IssueStatus[]> Transitions = new Dictionary<IssueStatus, IssueStatus[]>
+    {
         [IssueStatus.Open] = [IssueStatus.InProgress],
         [IssueStatus.InProgress] = [IssueStatus.InReview, IssueStatus.Open],
         [IssueStatus.InReview] = [IssueStatus.Resolved, IssueStatus.InProgress, IssueStatus.Open],
@@ -16,7 +17,8 @@ public static class WorkflowEngine
     {
         var fix = issue.FixReferences.OrderByDescending(f => f.Id).FirstOrDefault();
         if (fix?.CommitHash is not { Length: 40 } || issue.RegressionTests.Count == 0) return false;
-        return issue.RegressionTests.All(t => {
+        return issue.RegressionTests.All(t =>
+        {
             var e = t.Executions.OrderByDescending(e => e.Id).FirstOrDefault();
             return e is { Result: TestResult.Passed, IsDefectiveFixture: false }
                 && e.ExecutionSource == "PatchDesk controlled registry"

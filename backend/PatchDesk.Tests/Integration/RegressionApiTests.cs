@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using PatchDesk.Tests.Fixtures;
 namespace PatchDesk.Tests.Integration;
+
 public class RegressionApiTests
 {
     [Fact]

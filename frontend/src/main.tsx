@@ -5,5 +5,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WorkspaceProvider } from './components/WorkspaceProvider'
 import './index.css'
 import App from './App'
-const client = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } })
-createRoot(document.getElementById('root')!).render(<StrictMode><QueryClientProvider client={client}><BrowserRouter><WorkspaceProvider><App /></WorkspaceProvider></BrowserRouter></QueryClientProvider></StrictMode>)
+const client = new QueryClient({
+  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+})
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <QueryClientProvider client={client}>
+      <BrowserRouter>
+        <WorkspaceProvider>
+          <App />
+        </WorkspaceProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  </StrictMode>,
+)

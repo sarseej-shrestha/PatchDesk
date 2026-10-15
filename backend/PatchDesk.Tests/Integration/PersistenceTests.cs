@@ -3,6 +3,7 @@ using PatchDesk.Api.Data;
 using PatchDesk.Api.Models;
 using PatchDesk.Tests.Fixtures;
 namespace PatchDesk.Tests.Integration;
+
 public class PersistenceTests
 {
     [Fact]

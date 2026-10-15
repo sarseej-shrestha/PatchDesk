@@ -4,6 +4,7 @@ using PatchDesk.Api.Middleware;
 using PatchDesk.Api.Models;
 using PatchDesk.Api.Regression;
 namespace PatchDesk.Api.Services;
+
 public class RegressionService(PatchDeskDbContext db, IssueService issues, IBuildIdentity build)
 {
     public async Task<IssueDto> Associate(int id, AssociateTestRequest r, CancellationToken ct)
@@ -20,11 +21,15 @@ public class RegressionService(PatchDeskDbContext db, IssueService issues, IBuil
         var i = await issues.Get(id, ct); IssueService.RequireVersion(i, r.Version); IssueService.RequireEditable(i); await issues.RequireActor(r.ActorId, ct);
         var test = i.RegressionTests.SingleOrDefault(t => t.Id == testId) ?? throw new ApiException(404, "Associated regression test not found.");
         var result = RegressionRegistry.Run(test.TestIdentifier, r.DefectiveFixture);
-        var execution = new TestExecution {
+        var execution = new TestExecution
+        {
             Result = result.Passed ? TestResult.Passed : TestResult.Failed,
-            ExecutionSource = "PatchDesk controlled registry", CommitHash = build.IsClean ? build.Commit : "",
-            DurationMilliseconds = result.DurationMilliseconds, Evidence = $"{result.Evidence}; assembly-sha256={build.AssemblySha256}; clean-checkout={build.IsClean}",
-            EvidenceRevision = i.EvidenceRevision, IsDefectiveFixture = r.DefectiveFixture
+            ExecutionSource = "PatchDesk controlled registry",
+            CommitHash = build.IsClean ? build.Commit : "",
+            DurationMilliseconds = result.DurationMilliseconds,
+            Evidence = $"{result.Evidence}; assembly-sha256={build.AssemblySha256}; clean-checkout={build.IsClean}",
+            EvidenceRevision = i.EvidenceRevision,
+            IsDefectiveFixture = r.DefectiveFixture
         };
         test.Executions.Add(execution); test.LatestResult = execution.Result; test.LastExecutedAt = execution.ExecutedAt;
         IssueService.Record(i, r.ActorId, "TestExecuted", null, $"{test.TestIdentifier}: {execution.Result} ({(r.DefectiveFixture ? "defective fixture" : "corrected implementation")})");

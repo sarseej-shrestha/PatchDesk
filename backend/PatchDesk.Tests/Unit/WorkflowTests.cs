@@ -2,6 +2,7 @@ using PatchDesk.Api.Models;
 using PatchDesk.Api.Services;
 using PatchDesk.Api.Middleware;
 namespace PatchDesk.Tests.Unit;
+
 public class WorkflowTests
 {
     private static Issue Issue(IssueStatus status) => new() { Title = "Boundary defect", Description = "Discount", ReporterId = 1, AssigneeId = 2, Status = status };

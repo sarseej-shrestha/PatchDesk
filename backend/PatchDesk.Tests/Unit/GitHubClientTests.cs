@@ -2,6 +2,7 @@ using System.Net;
 using PatchDesk.Api.Middleware;
 using PatchDesk.Api.Services;
 namespace PatchDesk.Tests.Unit;
+
 public class GitHubClientTests
 {
     private class Handler(HttpStatusCode status) : HttpMessageHandler

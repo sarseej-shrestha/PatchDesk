@@ -1,5 +1,6 @@
 using PatchDesk.Api.Regression;
 namespace PatchDesk.Tests.Unit;
+
 public class RegressionTests
 {
     [Theory]

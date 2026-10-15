@@ -42,7 +42,8 @@ public class IssueService(PatchDeskDbContext db)
         if (query.AssigneeId.HasValue) q = q.Where(i => i.AssigneeId == query.AssigneeId);
         if (!string.IsNullOrWhiteSpace(query.Search)) { var term = query.Search.Trim().ToLower(); q = q.Where(i => i.Title.ToLower().Contains(term) || i.Description.ToLower().Contains(term)); }
         var total = await q.CountAsync(ct);
-        q = query.Sort switch {
+        q = query.Sort switch
+        {
             "newest" => q.OrderByDescending(i => i.CreatedAt).ThenByDescending(i => i.Id),
             "oldest" => q.OrderBy(i => i.CreatedAt).ThenBy(i => i.Id),
             "priority" => q.OrderByDescending(i => i.Priority).ThenByDescending(i => i.Id),

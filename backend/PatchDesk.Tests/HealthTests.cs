@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 namespace PatchDesk.Tests;
+
 public class HealthTests
 {
     [Fact]

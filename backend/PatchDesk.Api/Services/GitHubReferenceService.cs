@@ -3,6 +3,7 @@ using PatchDesk.Api.Data;
 using PatchDesk.Api.DTOs;
 using PatchDesk.Api.Middleware;
 namespace PatchDesk.Api.Services;
+
 public class GitHubReferenceService(PatchDeskDbContext db, IssueService issues)
 {
     public const string Repository = "https://github.com/sarseej-shrestha/PatchDesk";

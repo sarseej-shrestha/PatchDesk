@@ -1,4 +1,5 @@
 namespace PatchDesk.Api.Regression;
+
 public static class DiscountCalculator
 {
     public static decimal Calculate(decimal subtotal, decimal percent)

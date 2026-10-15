@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc -b",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "format": "prettier --write src e2e *.ts *.js *.json index.html"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -31,6 +32,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
+    "prettier": "^3.9.10",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.71.2",
     "vite": "^8.3.0"

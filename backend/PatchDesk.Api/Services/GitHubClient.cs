@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using PatchDesk.Api.Middleware;
 namespace PatchDesk.Api.Services;
+
 public record GitHubCheck(string Name, string Status, string? Conclusion, string? Url);
 public record PullRequestState(int Number, string Title, string State, bool Merged, string Url, string HeadCommit, IReadOnlyList<GitHubCheck> Checks, DateTime FetchedAt);
 public class GitHubClient(HttpClient http)

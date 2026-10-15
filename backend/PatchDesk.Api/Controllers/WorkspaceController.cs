@@ -4,6 +4,7 @@ using PatchDesk.Api.Data;
 using PatchDesk.Api.DTOs;
 using PatchDesk.Api.Models;
 namespace PatchDesk.Api.Controllers;
+
 [ApiController, Route("api")]
 public class WorkspaceController(PatchDeskDbContext db) : ControllerBase
 {

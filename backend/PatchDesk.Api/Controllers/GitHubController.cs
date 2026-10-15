@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PatchDesk.Api.DTOs;
 using PatchDesk.Api.Services;
 namespace PatchDesk.Api.Controllers;
+
 [ApiController, Route("api")]
 public class GitHubController(GitHubReferenceService references, GitHubClient github) : ControllerBase
 {

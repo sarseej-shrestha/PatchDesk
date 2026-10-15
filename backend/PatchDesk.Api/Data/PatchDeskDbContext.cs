@@ -31,7 +31,8 @@ public class PatchDeskDbContext(DbContextOptions<PatchDeskDbContext> options) : 
         b.Entity<RegressionTest>().HasIndex(t => new { t.IssueId, t.TestIdentifier }).IsUnique();
         b.Entity<RegressionTest>().HasMany(t => t.Executions).WithOne().HasForeignKey(e => e.RegressionTestId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<TestExecution>().HasIndex(e => new { e.RegressionTestId, e.ExecutedAt });
-        b.Entity<Issue>().ToTable(t => {
+        b.Entity<Issue>().ToTable(t =>
+        {
             t.HasCheckConstraint("CK_Issue_Enums", "IssueType BETWEEN 0 AND 3 AND Priority BETWEEN 0 AND 3 AND Severity BETWEEN 0 AND 3 AND Status BETWEEN 0 AND 4");
             t.HasCheckConstraint("CK_Issue_Title", "length(trim(Title)) BETWEEN 1 AND 200");
             t.HasCheckConstraint("CK_Issue_Version", "Version > 0 AND EvidenceRevision > 0");

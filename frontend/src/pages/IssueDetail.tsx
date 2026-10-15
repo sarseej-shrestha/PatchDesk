@@ -9,26 +9,314 @@ import { ActivityList, Badge, Heading, State } from '../components/Common'
 import Verification from '../components/Verification'
 import FixReferences from '../components/FixReferences'
 export default function IssueDetail({ verification = false }: { verification?: boolean }) {
-  const { id = '104' } = useParams(); const navigate = useNavigate(); const { actorId } = useWorkspace(); const developers = useDevelopers(); const action = useAction()
+  const { id = '104' } = useParams()
+  const navigate = useNavigate()
+  const { actorId } = useWorkspace()
+  const developers = useDevelopers()
+  const action = useAction()
   const query = useQuery({ queryKey: ['issue', id], queryFn: () => api<Issue>(`/issues/${id}`) })
-  const transitions = useQuery({ queryKey: ['transitions', id], queryFn: () => api<{ allowed: Status[]; hasCurrentEvidence: boolean }>(`/issues/${id}/transitions`) })
+  const transitions = useQuery({
+    queryKey: ['transitions', id],
+    queryFn: () =>
+      api<{ allowed: Status[]; hasCurrentEvidence: boolean }>(`/issues/${id}/transitions`),
+  })
   if (!query.data) return <State loading={query.isPending} error={query.error} />
-  const issue = query.data; const locked = issue.status === 'Resolved' || action.isPending
-  const save = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); action.mutate({ path: `/issues/${id}`, method: 'PUT', body: { ...Object.fromEntries(new FormData(e.currentTarget)), actorId, version: issue.version } }) }
-  return <><Link className="back" to="/issues"><ArrowLeft size={15} /> All issues</Link><Heading eyebrow={`PD-${issue.id} / ${issue.issueType.toUpperCase()}`} title={issue.title}><Badge>{issue.status}</Badge></Heading>
-    <div className="detail-tabs"><Link className={!verification ? 'selected' : ''} to={`/issues/${id}`}>Issue detail</Link><Link className={verification ? 'selected' : ''} to={`/verification/${id}`}>Verification workspace</Link><span>Version {issue.version}</span></div>
-    <div className="detail-grid"><div className="detail-main">{!verification && <section className="panel padded"><h2>Problem & reproduction</h2><p className="preserve">{issue.description}</p><h3>Reproduction steps</h3><p className="preserve muted">{issue.reproductionSteps || 'No reproduction steps recorded.'}</p>
-      <details><summary>Edit issue details</summary><form className="form-panel" key={issue.version} onSubmit={save}><label>Title<input name="title" defaultValue={issue.title} required maxLength={200} disabled={locked} /></label><label>Description<textarea name="description" defaultValue={issue.description} required maxLength={10000} disabled={locked} /></label><label>Reproduction steps<textarea name="reproductionSteps" defaultValue={issue.reproductionSteps} maxLength={10000} disabled={locked} /></label><div className="form-grid"><label>Priority<select name="priority" defaultValue={issue.priority} disabled={locked}>{['Low', 'Medium', 'High', 'Critical'].map(p => <option key={p}>{p}</option>)}</select></label><label>Severity<select name="severity" defaultValue={issue.severity} disabled={locked}>{['Minor', 'Moderate', 'Major', 'Critical'].map(p => <option key={p}>{p}</option>)}</select></label></div><button className="primary" disabled={locked}>Save details</button></form></details></section>}
-      <Verification issue={issue} />
-      <FixReferences issue={issue} />
-      {!verification && <section className="panel padded"><h2>Discussion</h2>{issue.comments.map(c => <article className="comment" key={c.id}><strong>{c.author}</strong><time>{new Date(c.createdAt).toLocaleString()}</time><p className="preserve">{c.content}</p></article>)}<form className="form-panel" onSubmit={e => { e.preventDefault(); const form = e.currentTarget; action.mutate({ path: `/issues/${id}/comments`, body: { content: new FormData(form).get('content'), actorId, version: issue.version } }, { onSuccess: () => form.reset() }) }}><label>Add a comment<textarea name="content" required maxLength={5000} rows={3} placeholder="Record a finding or review decision…" /></label><button disabled={action.isPending}>Post comment</button></form></section>}
-      <section className="panel"><div className="panel-heading"><h2>Issue timeline</h2></div><ActivityList items={issue.activities} /></section></div>
-      <aside className="detail-aside"><section className="panel padded"><h2>Ownership</h2><dl><dt>Reporter</dt><dd>{issue.reporter}</dd><dt>Priority</dt><dd><Badge>{issue.priority}</Badge></dd><dt>Severity</dt><dd>{issue.severity}</dd></dl><label>Assignee<select aria-label="Issue assignee" value={issue.assigneeId ?? ''} disabled={locked} onChange={e => action.mutate({ path: `/issues/${id}/assignee`, method: 'PATCH', body: { actorId, version: issue.version, assigneeId: e.target.value ? Number(e.target.value) : null } })}><option value="">Unassigned</option>{developers.data?.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></label></section>
-      <section className="panel padded"><h2>Move work forward</h2><State error={transitions.error} /><p className="muted">{transitions.data?.hasCurrentEvidence ? 'Current passing evidence matches the linked fix.' : 'Verified bug resolution needs current passing evidence and a matching fix commit.'}</p>
-      <form className="form-panel" key={issue.version} onSubmit={e => { e.preventDefault(); const f = new FormData(e.currentTarget); const manualOverride = f.get('manualOverride') === 'on'; if (manualOverride && !window.confirm('Resolve with a manual override? This will be labeled as unverified and recorded with your reason.')) return; action.mutate({ path: `/issues/${id}/status`, method: 'PATCH', body: { status: f.get('status'), resolutionNote: f.get('resolutionNote'), overrideReason: f.get('overrideReason'), manualOverride, actorId, version: issue.version } }) }}>
-        <label>Next status<select name="status" required>{transitions.data?.allowed.map(s => <option key={s}>{s}</option>)}</select></label><label>Resolution note<textarea name="resolutionNote" maxLength={5000} rows={3} placeholder="Required when resolving" /></label>
-        {issue.status === 'InReview' && <details><summary>Manual override (prototype)</summary><label className="checkbox"><input type="checkbox" name="manualOverride" /> Resolve without verified evidence</label><label>Override reason<textarea name="overrideReason" maxLength={5000} /></label></details>}
-        <button className="primary" disabled={action.isPending || !transitions.data}>Update status</button></form>
-        {issue.resolutionNote && <div className="notice"><strong>{issue.resolutionOverridden ? 'Manual resolution · unverified' : 'Resolution note'}</strong><p>{issue.resolutionNote}</p></div>}</section>
-      <section className="panel padded"><h3>Issue record</h3><p className="muted">Created {new Date(issue.createdAt).toLocaleString()}<br />Updated {new Date(issue.updatedAt).toLocaleString()}</p><button className="danger" disabled={locked} onClick={() => { if (window.confirm(`Permanently delete PD-${issue.id} and its history?`)) action.mutate({ path: `/issues/${id}?actorId=${actorId}&version=${issue.version}`, method: 'DELETE' }, { onSuccess: () => navigate('/issues') }) }}>Delete issue</button></section></aside></div></>
+  const issue = query.data
+  const locked = issue.status === 'Resolved' || action.isPending
+  const save = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    action.mutate({
+      path: `/issues/${id}`,
+      method: 'PUT',
+      body: {
+        ...Object.fromEntries(new FormData(e.currentTarget)),
+        actorId,
+        version: issue.version,
+      },
+    })
+  }
+  return (
+    <>
+      <Link className="back" to="/issues">
+        <ArrowLeft size={15} /> All issues
+      </Link>
+      <Heading eyebrow={`PD-${issue.id} / ${issue.issueType.toUpperCase()}`} title={issue.title}>
+        <Badge>{issue.status}</Badge>
+      </Heading>
+      <div className="detail-tabs">
+        <Link className={!verification ? 'selected' : ''} to={`/issues/${id}`}>
+          Issue detail
+        </Link>
+        <Link className={verification ? 'selected' : ''} to={`/verification/${id}`}>
+          Verification workspace
+        </Link>
+        <span>Version {issue.version}</span>
+      </div>
+      <div className="detail-grid">
+        <div className="detail-main">
+          {!verification && (
+            <section className="panel padded">
+              <h2>Problem & reproduction</h2>
+              <p className="preserve">{issue.description}</p>
+              <h3>Reproduction steps</h3>
+              <p className="preserve muted">
+                {issue.reproductionSteps || 'No reproduction steps recorded.'}
+              </p>
+              <details>
+                <summary>Edit issue details</summary>
+                <form className="form-panel" key={issue.version} onSubmit={save}>
+                  <label>
+                    Title
+                    <input
+                      name="title"
+                      defaultValue={issue.title}
+                      required
+                      maxLength={200}
+                      disabled={locked}
+                    />
+                  </label>
+                  <label>
+                    Description
+                    <textarea
+                      name="description"
+                      defaultValue={issue.description}
+                      required
+                      maxLength={10000}
+                      disabled={locked}
+                    />
+                  </label>
+                  <label>
+                    Reproduction steps
+                    <textarea
+                      name="reproductionSteps"
+                      defaultValue={issue.reproductionSteps}
+                      maxLength={10000}
+                      disabled={locked}
+                    />
+                  </label>
+                  <div className="form-grid">
+                    <label>
+                      Priority
+                      <select name="priority" defaultValue={issue.priority} disabled={locked}>
+                        {['Low', 'Medium', 'High', 'Critical'].map((p) => (
+                          <option key={p}>{p}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Severity
+                      <select name="severity" defaultValue={issue.severity} disabled={locked}>
+                        {['Minor', 'Moderate', 'Major', 'Critical'].map((p) => (
+                          <option key={p}>{p}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <button className="primary" disabled={locked}>
+                    Save details
+                  </button>
+                </form>
+              </details>
+            </section>
+          )}
+          <Verification issue={issue} />
+          <FixReferences issue={issue} />
+          {!verification && (
+            <section className="panel padded">
+              <h2>Discussion</h2>
+              {issue.comments.map((c) => (
+                <article className="comment" key={c.id}>
+                  <strong>{c.author}</strong>
+                  <time>{new Date(c.createdAt).toLocaleString()}</time>
+                  <p className="preserve">{c.content}</p>
+                </article>
+              ))}
+              <form
+                className="form-panel"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const form = e.currentTarget
+                  action.mutate(
+                    {
+                      path: `/issues/${id}/comments`,
+                      body: {
+                        content: new FormData(form).get('content'),
+                        actorId,
+                        version: issue.version,
+                      },
+                    },
+                    { onSuccess: () => form.reset() },
+                  )
+                }}
+              >
+                <label>
+                  Add a comment
+                  <textarea
+                    name="content"
+                    required
+                    maxLength={5000}
+                    rows={3}
+                    placeholder="Record a finding or review decision…"
+                  />
+                </label>
+                <button disabled={action.isPending}>Post comment</button>
+              </form>
+            </section>
+          )}
+          <section className="panel">
+            <div className="panel-heading">
+              <h2>Issue timeline</h2>
+            </div>
+            <ActivityList items={issue.activities} />
+          </section>
+        </div>
+        <aside className="detail-aside">
+          <section className="panel padded">
+            <h2>Ownership</h2>
+            <dl>
+              <dt>Reporter</dt>
+              <dd>{issue.reporter}</dd>
+              <dt>Priority</dt>
+              <dd>
+                <Badge>{issue.priority}</Badge>
+              </dd>
+              <dt>Severity</dt>
+              <dd>{issue.severity}</dd>
+            </dl>
+            <label>
+              Assignee
+              <select
+                aria-label="Issue assignee"
+                value={issue.assigneeId ?? ''}
+                disabled={locked}
+                onChange={(e) =>
+                  action.mutate({
+                    path: `/issues/${id}/assignee`,
+                    method: 'PATCH',
+                    body: {
+                      actorId,
+                      version: issue.version,
+                      assigneeId: e.target.value ? Number(e.target.value) : null,
+                    },
+                  })
+                }
+              >
+                <option value="">Unassigned</option>
+                {developers.data?.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </section>
+          <section className="panel padded">
+            <h2>Move work forward</h2>
+            <State error={transitions.error} />
+            <p className="muted">
+              {transitions.data?.hasCurrentEvidence
+                ? 'Current passing evidence matches the linked fix.'
+                : 'Verified bug resolution needs current passing evidence and a matching fix commit.'}
+            </p>
+            <form
+              className="form-panel"
+              key={issue.version}
+              onSubmit={(e) => {
+                e.preventDefault()
+                const f = new FormData(e.currentTarget)
+                const manualOverride = f.get('manualOverride') === 'on'
+                if (
+                  manualOverride &&
+                  !window.confirm(
+                    'Resolve with a manual override? This will be labeled as unverified and recorded with your reason.',
+                  )
+                )
+                  return
+                action.mutate({
+                  path: `/issues/${id}/status`,
+                  method: 'PATCH',
+                  body: {
+                    status: f.get('status'),
+                    resolutionNote: f.get('resolutionNote'),
+                    overrideReason: f.get('overrideReason'),
+                    manualOverride,
+                    actorId,
+                    version: issue.version,
+                  },
+                })
+              }}
+            >
+              <label>
+                Next status
+                <select name="status" required>
+                  {transitions.data?.allowed.map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Resolution note
+                <textarea
+                  name="resolutionNote"
+                  maxLength={5000}
+                  rows={3}
+                  placeholder="Required when resolving"
+                />
+              </label>
+              {issue.status === 'InReview' && (
+                <details>
+                  <summary>Manual override (prototype)</summary>
+                  <label className="checkbox">
+                    <input type="checkbox" name="manualOverride" /> Resolve without verified
+                    evidence
+                  </label>
+                  <label>
+                    Override reason
+                    <textarea name="overrideReason" maxLength={5000} />
+                  </label>
+                </details>
+              )}
+              <button className="primary" disabled={action.isPending || !transitions.data}>
+                Update status
+              </button>
+            </form>
+            {issue.resolutionNote && (
+              <div className="notice">
+                <strong>
+                  {issue.resolutionOverridden
+                    ? 'Manual resolution · unverified'
+                    : 'Resolution note'}
+                </strong>
+                <p>{issue.resolutionNote}</p>
+              </div>
+            )}
+          </section>
+          <section className="panel padded">
+            <h3>Issue record</h3>
+            <p className="muted">
+              Created {new Date(issue.createdAt).toLocaleString()}
+              <br />
+              Updated {new Date(issue.updatedAt).toLocaleString()}
+            </p>
+            <button
+              className="danger"
+              disabled={locked}
+              onClick={() => {
+                if (window.confirm(`Permanently delete PD-${issue.id} and its history?`))
+                  action.mutate(
+                    {
+                      path: `/issues/${id}?actorId=${actorId}&version=${issue.version}`,
+                      method: 'DELETE',
+                    },
+                    { onSuccess: () => navigate('/issues') },
+                  )
+              }}
+            >
+              Delete issue
+            </button>
+          </section>
+        </aside>
+      </div>
+    </>
+  )
 }

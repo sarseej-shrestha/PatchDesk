@@ -13,7 +13,8 @@ builder.Services.AddScoped<PatchDesk.Api.Services.RegressionService>();
 builder.Services.AddSingleton<PatchDesk.Api.Services.IBuildIdentity, PatchDesk.Api.Services.BuildIdentity>();
 builder.Services.AddDbContext<PatchDeskDbContext>(o => o.UseSqlite(builder.Configuration.GetConnectionString("PatchDesk") ?? "Data Source=patchdesk.db"));
 builder.Services.AddScoped<PatchDesk.Api.Services.GitHubReferenceService>();
-builder.Services.AddHttpClient<PatchDesk.Api.Services.GitHubClient>(http => {
+builder.Services.AddHttpClient<PatchDesk.Api.Services.GitHubClient>(http =>
+{
     http.BaseAddress = new Uri("https://api.github.com/repos/sarseej-shrestha/PatchDesk/");
     http.DefaultRequestHeaders.UserAgent.ParseAdd("PatchDesk/1.0");
     http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");

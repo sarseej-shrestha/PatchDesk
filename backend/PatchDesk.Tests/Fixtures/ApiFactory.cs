@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using PatchDesk.Api.Data;
 namespace PatchDesk.Tests.Fixtures;
+
 public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     private readonly string path = Path.Combine(Path.GetTempPath(), $"patchdesk-test-{Guid.NewGuid():N}.db");

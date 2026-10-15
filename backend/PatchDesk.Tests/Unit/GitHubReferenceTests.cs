@@ -2,6 +2,7 @@ using PatchDesk.Api.DTOs;
 using PatchDesk.Api.Middleware;
 using PatchDesk.Api.Services;
 namespace PatchDesk.Tests.Unit;
+
 public class GitHubReferenceTests
 {
     [Theory]

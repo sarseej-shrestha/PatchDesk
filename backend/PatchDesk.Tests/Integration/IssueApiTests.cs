@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using PatchDesk.Tests.Fixtures;
 namespace PatchDesk.Tests.Integration;
+
 public class IssueApiTests
 {
     public static object Report(string title = "New defect") => new { title, description = "Observed failure", reproductionSteps = "Run the boundary case", issueType = "Bug", priority = "High", severity = "Major", reporterId = 1, assigneeId = 2 };

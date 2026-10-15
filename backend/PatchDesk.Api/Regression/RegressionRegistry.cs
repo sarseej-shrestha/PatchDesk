@@ -1,5 +1,6 @@
 using System.Diagnostics;
 namespace PatchDesk.Api.Regression;
+
 public record RegisteredTest(string Identifier, string Name, string Description, decimal Subtotal, decimal Percent, decimal Expected);
 public record RegistryResult(bool Passed, string Evidence, long DurationMilliseconds);
 public static class RegressionRegistry
