@@ -30,6 +30,9 @@ public static class DemoSeed
             };
             issue.Activities.Add(new IssueActivity { ActorId = issue.ReporterId, Action = "SeededDemo", NewValue = $"Fictional issue initialized as {status}", Timestamp = epoch.AddHours(n) });
             if (n % 3 == 0 || n == 4) issue.Comments.Add(new IssueComment { AuthorId = 5, Content = "Please document the reproduction and link execution evidence before review. (Fictional demo comment.)", CreatedAt = epoch.AddHours(n + 1) });
+            if (n == 4)
+                foreach (var test in Regression.RegressionRegistry.Tests.Take(2))
+                    issue.RegressionTests.Add(new RegressionTest { TestIdentifier = test.Identifier, TestName = test.Name, Description = test.Description });
             db.Issues.Add(issue);
         }
         await db.SaveChangesAsync();

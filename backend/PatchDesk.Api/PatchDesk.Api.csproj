@@ -16,4 +16,13 @@
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
   </ItemGroup>
 
+  <Target Name="CaptureSourceState" BeforeTargets="GetAssemblyAttributes">
+    <Exec Command="git status --porcelain --untracked-files=normal" WorkingDirectory="$(MSBuildProjectDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="Low">
+      <Output TaskParameter="ConsoleOutput" ItemName="SourceChanges" />
+    </Exec>
+    <ItemGroup>
+      <AssemblyMetadata Include="SourceTreeClean" Value="true" Condition="'@(SourceChanges)' == ''" />
+      <AssemblyMetadata Include="SourceTreeClean" Value="false" Condition="'@(SourceChanges)' != ''" />
+    </ItemGroup>
+  </Target>
 </Project>

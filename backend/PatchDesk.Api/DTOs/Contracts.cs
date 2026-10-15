@@ -43,3 +43,5 @@ public record TransitionRequest(
     [EnumDataType(typeof(IssueStatus))] IssueStatus Status,
     [Range(1, int.MaxValue)] int ActorId, [Range(1, int.MaxValue)] int Version,
     [StringLength(5000)] string? ResolutionNote = null, bool ManualOverride = false, [StringLength(5000)] string? OverrideReason = null);
+public record AssociateTestRequest([Required, StringLength(100)] string TestIdentifier, [Range(1, int.MaxValue)] int ActorId, [Range(1, int.MaxValue)] int Version);
+public record ExecuteTestRequest([Range(1, int.MaxValue)] int ActorId, [Range(1, int.MaxValue)] int Version, bool DefectiveFixture = false);
