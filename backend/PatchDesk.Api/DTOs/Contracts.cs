@@ -45,3 +45,4 @@ public record TransitionRequest(
     [StringLength(5000)] string? ResolutionNote = null, bool ManualOverride = false, [StringLength(5000)] string? OverrideReason = null);
 public record AssociateTestRequest([Required, StringLength(100)] string TestIdentifier, [Range(1, int.MaxValue)] int ActorId, [Range(1, int.MaxValue)] int Version);
 public record ExecuteTestRequest([Range(1, int.MaxValue)] int ActorId, [Range(1, int.MaxValue)] int Version, bool DefectiveFixture = false);
+public record FixRequest([StringLength(200)] string? BranchName, [StringLength(40)] string? CommitHash, [StringLength(500)] string? PullRequestUrl, [Required, StringLength(2000)] string Description, [Range(1, int.MaxValue)] int ActorId, [Range(1, int.MaxValue)] int Version);
